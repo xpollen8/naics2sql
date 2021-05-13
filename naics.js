@@ -2216,6 +2216,17 @@ console.log(`CREATE TABLE ${database}.naics (
 parsed.forEach(({ naics, description }) => {
 	if (naics) {
 		description = description.replace(/"/g, '').trim();;
+		// clean up bad descriptions of the form:
+		/// Broilers and Other Meat Type Chicken Production Broilers and Other Meat Type Chicken Production Broilers and Other Meat Type Chicken Produ....
+		if (description.length > 50) {
+			const words = description.split(' ');
+			const firstWords = words.slice(0, 4).join(' ');
+			const repeated = description.substr(1).indexOf(firstWords);
+			if (repeated > 0) {
+				const truncated = description.substr(0, repeated);
+				description = truncated;
+			}
+		}
 		console.log(`INSERT IGNORE INTO ${database}.naics (code, description) values (${naics}, "${description}");`);
 	}
 });
